@@ -1,0 +1,923 @@
+/* ==========================================================================
+   RAIS Studios — Digital Business Card
+   Palette: #000000 (Black), #FFFFFF (White), #FF3038 (Red), #A0A0A0 (Soft Grey)
+   ========================================================================== */
+
+:root {
+  --bg: #ffffff;
+  --ink: #000000;
+  --ink-body: rgba(0, 0, 0, 0.8);
+  --grey: #a0a0a0;
+  --grey-hairline: rgba(160, 160, 160, 0.28);
+  --red: #ff3038;
+  --card-surface: #ffffff;
+
+  --font-brush: 'Homemade Apple', cursive;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
+  --card-radius: 14px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Pre-animation visibility guards only when JS + reduced-motion allow GSAP */
+html.js-anim .char {
+  opacity: 0;
+}
+
+html.js-anim .logo-clip {
+  clip-path: inset(100% 0% 0% 0%);
+  -webkit-clip-path: inset(100% 0% 0% 0%);
+}
+
+html.js-anim .bio-block,
+html.js-anim .icon-link,
+html.js-anim .editorial-link,
+html.js-anim .cta-pill,
+html.js-anim .bg-marquee-layer {
+  opacity: 0;
+}
+
+/* Pure CSS fallback animations if GSAP CDN is unavailable or offline */
+@keyframes cssLogoClip {
+  from {
+    clip-path: inset(100% 0% 0% 0%);
+    -webkit-clip-path: inset(100% 0% 0% 0%);
+  }
+  to {
+    clip-path: inset(0% 0% 0% 0%);
+    -webkit-clip-path: inset(0% 0% 0% 0%);
+  }
+}
+
+@keyframes cssCharRise {
+  from {
+    transform: translateY(105%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0%);
+    opacity: 1;
+  }
+}
+
+@keyframes cssSigDraw {
+  from { stroke-dashoffset: 100; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes cssPerimeterChase {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -100; }
+}
+
+@keyframes cssFadeUp {
+  from {
+    transform: translateY(14px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+html.css-anim .logo-clip {
+  animation: cssLogoClip 0.9s var(--ease-editorial) 0.1s both;
+}
+
+html.css-anim .char {
+  animation: cssCharRise 0.8s var(--ease-editorial) 0.3s both;
+}
+
+html.css-anim .sig-stroke {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: cssSigDraw 1.1s ease-in-out 0.7s forwards;
+}
+
+html.css-anim .logo-frame-rect {
+  stroke-dasharray: 28 72;
+  opacity: 0.9;
+  animation: cssPerimeterChase 7.5s linear infinite;
+}
+
+html.css-anim .bio-block {
+  animation: cssFadeUp 0.7s var(--ease-editorial) 1.05s both;
+}
+
+html.css-anim .icon-link,
+html.css-anim .editorial-link,
+html.css-anim .cta-pill {
+  animation: cssFadeUp 0.65s var(--ease-editorial) 1.2s both;
+}
+
+/* ==========================================================================
+   Full-Screen Stage
+   ========================================================================== */
+
+.hero {
+  position: relative;
+  width: 100%;
+  min-height: 100svh;
+  height: 100dvh;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  padding: clamp(1rem, 3.2vw, 2.75rem);
+  background-color: var(--bg);
+}
+
+/* Opposing grey marquee bands */
+@keyframes marqueeLTR {
+  from { transform: translate3d(-50%, 0, 0); }
+  to { transform: translate3d(0%, 0, 0); }
+}
+
+@keyframes marqueeRTL {
+  from { transform: translate3d(0%, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+.bg-marquee-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  user-select: none;
+}
+
+.marquee-band {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%);
+}
+
+.marquee-band--ltr {
+  top: clamp(41%, 45vh, 48%);
+}
+
+.marquee-band--rtl {
+  bottom: clamp(5.2rem, 12.5vh, 7.2rem);
+  padding-block: clamp(0.45rem, 0.9vh, 0.62rem);
+  border-top: 1px solid var(--grey-hairline);
+  border-bottom: 1px solid var(--grey-hairline);
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+
+.marquee-track--ltr {
+  animation: marqueeLTR 38s linear infinite;
+}
+
+.marquee-track--rtl {
+  animation: marqueeRTL 48s linear infinite;
+}
+
+.marquee-group {
+  display: flex;
+  align-items: center;
+  gap: clamp(1.2rem, 2.6vw, 2.4rem);
+  padding-right: clamp(1.2rem, 2.6vw, 2.4rem);
+  white-space: nowrap;
+}
+
+.marquee-band--ltr .marquee-group {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: clamp(0.85rem, 1.35vw, 1.25rem);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(160, 160, 160, 0.44);
+}
+
+.marquee-band--rtl .marquee-group {
+  gap: clamp(1rem, 2vw, 1.8rem);
+  padding-right: clamp(1rem, 2vw, 1.8rem);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(0.65rem, 0.78vw, 0.76rem);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(160, 160, 160, 0.62);
+}
+
+.marquee-dot {
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: var(--red);
+  opacity: 0.72;
+  flex-shrink: 0;
+}
+
+/* Minimal red registration details */
+.accent-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.accent {
+  position: absolute;
+  display: block;
+  will-change: transform;
+}
+
+.accent-dot {
+  top: clamp(1.25rem, 5vh, 3.25rem);
+  right: clamp(1.25rem, 5vw, 4rem);
+  width: 5px;
+  height: 5px;
+  background-color: var(--red);
+}
+
+.accent-cross {
+  bottom: clamp(8.5rem, 23vh, 13.5rem);
+  left: clamp(1.5rem, 5vw, 4.5rem);
+  width: 14px;
+  height: 14px;
+}
+
+.accent-cross::before,
+.accent-cross::after {
+  content: '';
+  position: absolute;
+  background-color: var(--red);
+}
+
+.accent-cross::before {
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  transform: translateY(-50%);
+}
+
+.accent-cross::after {
+  left: 50%;
+  top: 0;
+  width: 1.5px;
+  height: 100%;
+  transform: translateX(-50%);
+}
+
+/* ==========================================================================
+   Desktop Asymmetric Composition (>= 900px: 1024px, 1440px+)
+   ========================================================================== */
+
+.card-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.studio-title {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  pointer-events: none;
+  z-index: 2;
+  user-select: none;
+}
+
+.title-line {
+  display: block;
+  white-space: nowrap;
+  color: var(--ink);
+}
+
+.title-line--rais {
+  position: absolute;
+  top: clamp(0.4rem, 1.5vh, 1.4rem);
+  left: 0;
+  display: inline-flex;
+  align-items: flex-start;
+  font-size: clamp(4.2rem, 8.8vw, 8.2rem);
+  line-height: 1;
+}
+
+.title-line--studios {
+  position: absolute;
+  top: clamp(19%, 22.5vh, 25%);
+  left: calc(50% + clamp(1.5rem, 3vw, 3rem));
+  font-family: var(--font-brush);
+  font-weight: 400;
+  font-size: clamp(2.1rem, 3.7vw, 3.5rem);
+  line-height: 1.25;
+  letter-spacing: 0;
+  color: var(--red);
+  transform: rotate(-3.5deg);
+  transform-origin: left center;
+}
+
+.char-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding: 0.04em 0.01em;
+  margin: -0.04em -0.01em;
+}
+
+.title-line--studios .char-mask {
+  padding: 0.34em 0.18em;
+  margin: -0.34em -0.18em;
+}
+
+.char {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+.title-line--rais .char-mask {
+  display: block;
+  padding: 0.02em 0;
+  margin: -0.02em 0;
+}
+
+.title-line--rais .char-mask--r {
+  padding-left: 0.01em;
+  margin-left: -0.01em;
+}
+
+.title-line--rais .char-mask--a {
+  margin-left: -0.0157em;
+}
+
+.title-line--rais .char-mask--i {
+  margin-left: 0.0139em;
+}
+
+.title-line--rais .char-mask--s {
+  margin-left: 0.0602em;
+  padding-right: 0.01em;
+  margin-right: -0.01em;
+}
+
+.title-line--rais .char {
+  display: block;
+}
+
+.rais-glyph {
+  display: block;
+  height: 1em;
+  width: auto;
+  overflow: visible;
+}
+
+.rais-glyph--r { width: 1.0074em; }
+.rais-glyph--a { width: 1.1130em; }
+.rais-glyph--i { width: 0.3639em; }
+.rais-glyph--s { width: 1.0870em; }
+
+/* Asymmetric logo card + aligned description block */
+.identity-stage {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: clamp(3rem, 6vw, 6rem);
+  width: min(1080px, 90vw);
+  margin-top: clamp(2rem, 5vh, 4rem);
+  pointer-events: none;
+}
+
+.centerpiece {
+  justify-self: end;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo-tilt-wrap {
+  perspective: 1100px;
+  pointer-events: auto;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.logo-plate {
+  position: relative;
+  margin: 0;
+  width: clamp(220px, 23.5vw, 320px);
+  aspect-ratio: 1 / 1;
+  border-radius: var(--card-radius);
+  background-color: var(--card-surface);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 22px 44px -20px rgba(0, 0, 0, 0.16),
+    0 4px 12px -4px rgba(0, 0, 0, 0.05);
+  will-change: transform;
+  overflow: hidden;
+}
+
+.logo-clip {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  will-change: clip-path;
+}
+
+.logo-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  mix-blend-mode: multiply;
+  transform: translateY(-6%) scale(0.94);
+  filter: contrast(1.12) brightness(1.06);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.logo-sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    circle at var(--sheen-x, 50%) var(--sheen-y, 50%),
+    rgba(255, 255, 255, 0.25) 0%,
+    rgba(255, 255, 255, 0) 58%
+  );
+  transition: opacity 0.35s var(--ease-editorial);
+}
+
+.logo-tilt-wrap:focus-visible {
+  outline: 1.5px solid var(--red);
+  outline-offset: 6px;
+  border-radius: calc(var(--card-radius) + 4px);
+}
+
+/* Continuous thin red perimeter tracing line */
+.logo-frame-trace {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.logo-frame-rect {
+  fill: none;
+  stroke: var(--red);
+  stroke-width: 1.6;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+  stroke-dasharray: 28 72;
+  stroke-dashoffset: 0;
+  opacity: 0;
+}
+
+/* Red handwritten signature anchored cleanly inside lower card margin */
+.signature-overlay {
+  position: absolute;
+  left: 14%;
+  bottom: 4.5%;
+  width: 72%;
+  height: auto;
+  z-index: 4;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.sig-stroke {
+  stroke: var(--red);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Right-flank understated developer introduction */
+.bio-block {
+  justify-self: start;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-top: clamp(3rem, 7vh, 5.25rem);
+  pointer-events: auto;
+}
+
+.bio-rule {
+  display: block;
+  width: 22px;
+  height: 1.5px;
+  background-color: var(--ink);
+  margin-bottom: 0.9rem;
+}
+
+.bio-line {
+  margin: 0;
+  max-width: 29ch;
+  text-align: left;
+  font-family: var(--font-sans);
+  font-size: clamp(0.88rem, 1vw, 1rem);
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  color: var(--ink-body);
+}
+
+/* ==========================================================================
+   Bottom Contact Dock & CTA Pill
+   ========================================================================== */
+
+.card-footer {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  width: 100%;
+  padding-top: 0.5rem;
+}
+
+.contact-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.icon-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  color: var(--ink);
+  background-color: var(--bg);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 0.28s var(--ease-editorial),
+    border-color 0.25s var(--ease-editorial),
+    color 0.25s var(--ease-editorial);
+}
+
+.icon-link svg {
+  width: 19px;
+  height: 19px;
+  display: block;
+}
+
+.icon-link:hover,
+.icon-link:focus-visible,
+.icon-link:active {
+  transform: translateY(-2px) scale(1.06);
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.icon-link:focus-visible,
+.editorial-link:focus-visible,
+.cta-pill:focus-visible {
+  outline: 1.5px solid var(--red);
+  outline-offset: 4px;
+}
+
+.action-links {
+  display: flex;
+  align-items: center;
+  gap: clamp(1rem, 2.4vw, 2rem);
+}
+
+.editorial-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding-block: 0.45rem;
+  color: var(--ink-body);
+  text-decoration: none;
+  font-family: var(--font-sans);
+  font-size: clamp(0.84rem, 0.95vw, 0.94rem);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.25s var(--ease-editorial);
+}
+
+.editorial-link--muted::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background-color: var(--red);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.34s var(--ease-editorial);
+}
+
+.editorial-link--muted:hover,
+.editorial-link--muted:focus-visible {
+  color: var(--ink);
+}
+
+.editorial-link--muted:hover::after,
+.editorial-link--muted:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* Black pill CTA with signature red accent edge & hover underline */
+.cta-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.48em;
+  padding: 0.78rem 1.55rem;
+  border-radius: 999px;
+  background-color: var(--ink);
+  color: var(--bg);
+  text-decoration: none;
+  font-family: var(--font-sans);
+  font-size: clamp(0.875rem, 0.98vw, 0.96rem);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  box-shadow: 2.5px 2.5px 0 0 var(--red);
+  will-change: transform;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color 0.25s var(--ease-editorial),
+    box-shadow 0.28s var(--ease-editorial);
+}
+
+.cta-pill:hover,
+.cta-pill:focus-visible {
+  box-shadow: 3.5px 3.5px 0 0 var(--red);
+}
+
+.cta-pill:active {
+  transform: scale(0.98);
+}
+
+.link-arrow {
+  display: inline-block;
+  transition: transform 0.3s var(--ease-editorial), color 0.25s var(--ease-editorial);
+}
+
+.editorial-link:hover .link-arrow,
+.editorial-link:focus-visible .link-arrow,
+.cta-pill:hover .link-arrow,
+.cta-pill:focus-visible .link-arrow {
+  transform: translate(2px, -2px);
+}
+
+.cta-pill:hover .link-arrow,
+.cta-pill:focus-visible .link-arrow {
+  color: var(--red);
+}
+
+/* ==========================================================================
+   Dedicated Centered Mobile & Tablet Composition (<= 899px)
+   Tested for 320px, 375px, 430px, 768px
+   ========================================================================== */
+
+@media (max-width: 899px) {
+  .bg-marquee-layer {
+    opacity: 0.72;
+  }
+
+  .marquee-track--ltr {
+    animation-duration: 46s;
+  }
+
+  .marquee-track--rtl {
+    animation-duration: 58s;
+  }
+
+  .marquee-band--ltr {
+    top: 41%;
+  }
+
+  .marquee-band--ltr .marquee-group {
+    font-size: clamp(0.72rem, 2.5vw, 0.95rem);
+    color: rgba(160, 160, 160, 0.36);
+  }
+
+  .marquee-band--rtl {
+    bottom: clamp(10.8rem, 23vh, 11.6rem);
+  }
+
+  .marquee-band--rtl .marquee-group {
+    font-size: clamp(0.58rem, 2.2vw, 0.7rem);
+    color: rgba(160, 160, 160, 0.48);
+  }
+
+  .accent-dot {
+    display: none;
+  }
+
+  .accent-cross {
+    top: clamp(1.25rem, 3.5vh, 2rem);
+    right: clamp(1.25rem, 5vw, 2rem);
+    bottom: auto;
+    left: auto;
+  }
+
+  .card-stage {
+    flex-direction: column;
+    justify-content: center;
+    gap: clamp(0.9rem, 2.4vh, 1.5rem);
+    padding-bottom: clamp(1.75rem, 4vh, 2.5rem);
+  }
+
+  .studio-title {
+    position: relative;
+    inset: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .title-line--rais {
+    position: static;
+    font-size: clamp(3.15rem, 15.2vw, 5.4rem);
+    line-height: 1;
+  }
+
+  .title-line--studios {
+    position: relative;
+    top: auto;
+    left: auto;
+    font-size: clamp(1.5rem, 6.2vw, 2.5rem);
+    line-height: 1.25;
+    letter-spacing: 0;
+    color: var(--red);
+    margin-top: -0.14em;
+    margin-left: 1.8em;
+    transform: rotate(-3.5deg);
+    transform-origin: center center;
+  }
+
+  .identity-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(1rem, 2.6vh, 1.5rem);
+    width: 100%;
+    margin-top: 0;
+  }
+
+  .centerpiece {
+    justify-self: center;
+  }
+
+  .logo-plate {
+    width: min(75vw, 288px);
+  }
+
+  .bio-block {
+    align-items: center;
+    padding-top: 0;
+  }
+
+  .bio-rule {
+    display: none;
+  }
+
+  .bio-line {
+    text-align: center;
+    max-width: 31ch;
+    font-size: clamp(0.84rem, 3.6vw, 0.96rem);
+    line-height: 1.55;
+  }
+
+  .card-footer {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding-top: 0.25rem;
+  }
+
+  .contact-icons {
+    justify-content: center;
+    gap: 0.9rem;
+  }
+
+  .action-links {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.55rem;
+    width: 100%;
+  }
+
+  .cta-pill {
+    width: min(100%, 300px);
+    padding: 0.8rem 1.5rem;
+  }
+
+  .editorial-link--muted {
+    order: 2;
+    font-size: 0.82rem;
+    padding-block: 0.25rem;
+  }
+}
+
+/* Ultra-compact mobile (320px width / short phones) */
+@media (max-width: 350px) {
+  .logo-plate {
+    width: 72vw;
+  }
+
+  .bio-line {
+    font-size: 0.8125rem;
+  }
+
+  .marquee-band--rtl {
+    bottom: 10.6rem;
+  }
+}
+
+@media (max-height: 640px) {
+  .hero {
+    height: auto;
+    min-height: 100svh;
+    gap: 1.5rem;
+  }
+
+  .card-stage {
+    padding-bottom: 3.75rem;
+  }
+
+  .marquee-band--rtl {
+    bottom: 10.6rem;
+  }
+}
+
+/* ==========================================================================
+   Accessibility: Reduced Motion
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  html.js-anim .char,
+  html.js-anim .bio-block,
+  html.js-anim .icon-link,
+  html.js-anim .editorial-link,
+  html.js-anim .cta-pill,
+  html.js-anim .bg-marquee-layer {
+    opacity: 1 !important;
+  }
+
+  .marquee-track {
+    animation: none !important;
+  }
+
+  html.js-anim .logo-clip {
+    clip-path: inset(0% 0% 0% 0%) !important;
+    -webkit-clip-path: inset(0% 0% 0% 0%) !important;
+  }
+}
