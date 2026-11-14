@@ -99,7 +99,7 @@
     gsap.set(strokes, { strokeDasharray: 100, strokeDashoffset: 100 });
     gsap.set(chars, { yPercent: 105, opacity: 0 });
     gsap.set('.logo-clip', { clipPath: 'inset(100% 0% 0% 0%)' });
-    gsap.set('.logo-img', { yPercent: -6, scale: 1.02 });
+    gsap.set('.logo-img', { yPercent: 0, scale: 1.02 });
     gsap.set('#bioBlock', { y: 12, opacity: 0 });
     gsap.set(footerItems, { y: 14, opacity: 0 });
 
@@ -120,7 +120,7 @@
       ease: 'power4.inOut',
     }, 0.1)
       .to('.logo-img', {
-        scale: 0.94,
+        scale: 1,
         duration: 1.1,
         ease: 'power3.out',
       }, 0.1)
@@ -142,9 +142,9 @@
       }, 0.3)
 
       // 4. Red handwritten signature draws smoothly and remains visible
-      .add(() => {
-        playSignatureDraw(strokes);
-      }, 0.68)
+      .to(strokes[0], { strokeDashoffset: 0, duration: 0.95, ease: 'power2.inOut' }, 0.68)
+      .to(strokes[1], { strokeDashoffset: 0, duration: 0.45, ease: 'power2.inOut' }, 0.82)
+      .to(strokes[2], { strokeDashoffset: 0, duration: 0.14, ease: 'power2.inOut' }, 0.96)
 
       // 5. Description fades in + grey marquees emerge quietly
       .to('#bioBlock', {
@@ -153,7 +153,7 @@
         duration: 0.68,
         ease: 'power3.out',
       }, 1.0)
-      .to('.bg-marquee-layer', {
+      .to(['.bg-marquee-layer', '.marquee-band--rtl'], {
         opacity: 1,
         duration: 0.9,
         ease: 'power2.out',
@@ -296,6 +296,16 @@
     });
   };
 
+  const initEmailInteraction = () => {
+    const emailLink = document.getElementById('emailLink');
+    if (!emailLink) return;
+    emailLink.addEventListener('click', () => {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText('raisstudio100k@gmail.com').catch(() => {});
+      }
+    });
+  };
+
   const strokes = document.documentElement.classList.contains('css-anim')
     ? gsap.utils.toArray('.sig-stroke')
     : initEntranceTimeline();
@@ -307,4 +317,5 @@
   initMagneticCTA();
   initRestrainedScrollDepth();
   initTapInteraction(strokes);
+  initEmailInteraction();
 })();
